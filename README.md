@@ -1,2 +1,2 @@
 # ceilingcat2
-Raspberry Pi + camera module + OpenCV
+Motion-based security system using Raspberry Pi camera module and OpenCV
