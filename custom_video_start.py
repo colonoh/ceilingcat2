@@ -3,7 +3,7 @@ import picamera.array
 import numpy as np
 import datetime, time
 
-motionDetected = 0
+motionDetected = 0 # counter contains current number of motion-detected frames (up to a limit)
 
 class MyMotionDetector(picamera.array.PiMotionAnalysis):
     def analyse(self, a):
@@ -12,10 +12,10 @@ class MyMotionDetector(picamera.array.PiMotionAnalysis):
         # If there're more than 10 vectors with a magnitude greater than 50, then say we've detected motion
         if (a > 20).sum() > 20:
             if motionDetected < 6.:
-                motionDetected += 1.
+                motionDetected += 1. # add because motion was detected
         else:
             if motionDetected > 0.:
-                motionDetected -= .2
+                motionDetected -= .1 # subtract because of lack of motion
 
 startTime = time.time() # time that camera turned on
 with picamera.PiCamera() as camera:
@@ -27,7 +27,7 @@ with picamera.PiCamera() as camera:
 
     print('Started!')
     while time.time() - startTime < 20:
-        if motionDetected > 3.: # if there is motion
+        if motionDetected > 3.: # trigger recording if there is enough motion
             camera.start_recording('{}.h264'.format(datetime.datetime.now()), splitter_port=2, intra_period=3)
 
             while motionDetected > 0.: # while there is motion
