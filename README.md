@@ -8,9 +8,10 @@ Motion-based security system using Raspberry Pi camera module
 - sensitivity based on number of vectors and magnitude
 - increased key frame rate to try and increase ability to extract usable images from frames
 - added frame counter to ignore spurious events and extend recording of large-motion events
-- TODO: add notifications
+- checks for presence by checking router for phone's MAC address
+- email notifications provided by Amazon SNS (notification on new item in bucket)
 - TODO: add immediate(?) uploading of videos
-- TODO: add bypass for when I'm home
+
 
 ##References
 
