@@ -3,15 +3,17 @@ import picamera.array
 import numpy as np
 import datetime, time
 import urllib.request
+import boto3
 
+s3 = boto3.resource('s3')
 motionDetected = 0 # counter contains current number of motion-detected frames (up to a limit)
 
 # currently checks for my presence by checking the router for my phone's MAC address
 def phonePresent(): # don't care for the name
-    routerAddress = 'W'
-    username = 'X'
-    password = 'Y'
-    phoneAddress = 'Z'
+    routerAddress = 'http://10.0.0.1/'
+    username = 'admin'
+    password = 'password'
+    phoneAddress = '00:11:94:BA:49:3C'
 
     password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
     password_mgr.add_password(None, routerAddress, username, password)
@@ -56,13 +58,15 @@ with picamera.PiCamera() as camera:
     iAmHere = False
     print('Started!')
     while True:
+        filename = ''
         if counter < 0:
             iAmHere = phonePresent()
             counter = 300
         else:
             counter -= 1
         if motionDetected > 3. and not iAmHere: # trigger recording if there is enough motion
-            camera.start_recording('{}.h264'.format(datetime.datetime.now()), splitter_port=2, intra_period=3)
+            filename = '{}.h264'.format(datetime.datetime.now())
+            camera.start_recording(filename, splitter_port=2, intra_period=3)
 
             while motionDetected > 0.: # while there is motion
                 camera.annotate_text = str(datetime.datetime.now())
@@ -71,6 +75,11 @@ with picamera.PiCamera() as camera:
             # no more motion
             camera.stop_recording(splitter_port=2)
             print('Done recording')
+            # upload to s3
+            print('Start uploading')
+            data = open(filename, 'rb')
+            s3.Bucket('qvqcbwk5').put_object(Key=filename, Body=data)
+            print('Done uploading')
 
         # if there isn't motion
         camera.wait_recording(.05)
